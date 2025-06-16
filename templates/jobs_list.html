@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Job Listings</title>
+</head>
+<body>
+    <h1>Available Jobs</h1>
+    <ul>
+        {% for job in jobs %}
+        <li>
+            <a href="/jobs/{{ job.id }}">{{ job.title }}</a> at {{ job.company }} ({{ job.location }})
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/companies/list">View Companies</a>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ company.name }} Details</title>
+</head>
+<body>
+    <h1>{{ company.name }}</h1>
+    <p>Industry: {{ company.industry }}</p>
+    <p>Location: {{ company.location }}</p>
+    <p>Employees: {{ company.employees_count }}</p>
+    
+    <h2>Available Jobs:</h2>
+    <ul>
+        {% for job in jobs %}
+            {% if job.company == company.name %}
+            <li><a href="/jobs/{{ job.id }}">{{ job.title }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    
+    <a href="/companies/list">Back to Companies</a>
+</body>
+</html>

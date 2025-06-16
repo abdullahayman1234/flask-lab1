@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Companies</title>
+</head>
+<body>
+    <h1>Companies List</h1>
+    <ul>
+        {% for company in companies %}
+        <li>
+            <a href="/companies/{{ company.id }}">{{ company.name }}</a> - {{ company.industry }} ({{ company.employees_count }} employees)
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/jobs/list">View Jobs</a>
+</body>
+</html>
