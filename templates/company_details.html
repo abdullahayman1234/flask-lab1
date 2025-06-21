@@ -1,23 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{{ company.name }} Details</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .company-info {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .info-label {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ company.name }}</h1>
-    <p>Industry: {{ company.industry }}</p>
-    <p>Location: {{ company.location }}</p>
-    <p>Employees: {{ company.employees_count }}</p>
-    
-    <h2>Available Jobs:</h2>
-    <ul>
-        {% for job in jobs %}
-            {% if job.company == company.name %}
-            <li><a href="/jobs/{{ job.id }}">{{ job.title }}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-    
-    <a href="/companies/list">Back to Companies</a>
+    <h1>Company Details</h1>
+    <div class="company-info">
+        <p><span class="info-label">ID:</span> {{ company.id }}</p>
+        <p><span class="info-label">Name:</span> {{ company.name }}</p>
+        <p><span class="info-label">Location:</span> {{ company.location }}</p>
+        <p><span class="info-label">Industry:</span> {{ company.industry }}</p>
+        <p><span class="info-label">Employees Count:</span> {{ company.employees_count }}</p>
+    </div>
 </body>
 </html>

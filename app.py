@@ -1,101 +1,129 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, IntegerField
+from wtforms.validators import DataRequired
+
 
 app = Flask(__name__)
-jobs = [
-    {
-        'id': 1,
-        'title': 'Software Engineer',
-        'location': 'Cairo',
-        'company': 'Tech Company'
-    },
-    {
-        'id': 2,
-        'title': 'Data Scientist',
-        'location': 'Alexandria',
-        'company': 'Data Corp'
-    },
-    {
-        'id': 3,
-        'title': 'Web Developer',
-        'location': 'Zagazig',
-        'company': 'Web Solutions'
-    },
-    {
-        'id': 4,
-        'title': 'Mobile Developer',
-        'location': 'Cairo',
-        'company': 'App Innovations'
-    },
-    {
-        'id': 5,
-        'title': 'DevOps Engineer',
-        'location': 'Giza',
-        'company': 'Cloud Services'
-    }
-]
-companies = [
-    {
-        'id': 1,
-        'name': 'Tech Company',
-        'location': 'Cairo',
-        'industry': 'Software Development',
-        'employees_count': 200
-    },
-    {
-        'id': 2,
-        'name': 'Data Corp',
-        'location': 'Alexandria',
-        'industry': 'Data Analytics',
-        'employees_count': 150
-    },
-    {
-        'id': 3,
-        'name': 'Web Solutions',
-        'location': 'Zagazig',
-        'industry': 'Web Development',
-        'employees_count': 50
-    },
-    {
-        'id': 4,
-        'name': 'App Innovations',
-        'location': 'Cairo',
-        'industry': 'Mobile Development',
-        'employees_count': 75
-    },
-    {
-        'id': 5,
-        'name': 'Cloud Services',
-        'location': 'Giza',
-        'industry': 'Cloud Computing',
-        'employees_count': 120
-    }
-]
-@app.route('/')
-def home():
-    return render_template('home.html')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+app.config['SECRET_KEY'] = 'iTi_Assuit_2025'
 
-@app.route('/jobs/list', methods=['GET'])
-def get_jobs():
-    return render_template('jobs_list.html', jobs=jobs)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+
+
+class Job(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String(200), nullable = False)
+    company = db.Column(db.String(200), nullable = False)
+    location = db.Column(db.String(200), nullable = False)
+    
+    def __repr__(self):
+        return f"{self.title}"
+
+
+class Company(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200), nullable=False)
+    industry = db.Column(db.String(200), nullable=False)
+    employees_count = db.Column(db.Integer, nullable=False)
+    
+    def __repr__(self):
+        return f"{self.name}"
+    
+    
+
+class JobCreationForm(FlaskForm):
+    title = StringField("Title", validators=[DataRequired()])
+    company = StringField("Company", validators=[DataRequired()])
+    location = StringField("Location", validators=[DataRequired()])
+    submit = SubmitField("Create Job")
+
+
+class CompanyCreationForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    location = StringField("Location", validators=[DataRequired()])
+    industry = StringField("Industry", validators=[DataRequired()])
+    employees_count = IntegerField("Employees Count", validators=[DataRequired()])
+    submit = SubmitField("Create Company")
+
+
+# @app.route("/", methods = ['GET']) # url
+# def hello_world(): # view
+#     return "Hello, Assiut!"
+
+
+# @app.route('/<str: name>')
+# def hello(name):
+#     return f'Hello, {name}!'
+
+
+@app.route('/jobs/list', methods = ['GET'])
+def list_jobs():
+    jobs = Job.query.all()
+    return render_template('jobs_list.html', jobs = jobs)
+
+
+@app.route('/jobs/<id>', methods = ['GET'])
+def get_job(id):
+    job = Job.query.get(id)
+    return render_template('jobs_list.html', jobs = [job])
+    
+
+@app.route('/jobs/create', methods = ['GET', 'POST'])
+def create_job():
+    form = JobCreationForm()
+    if form.validate_on_submit():
+        title = form.title.data
+        company = form.company.data
+        location = form.location.data
+        
+        new_job = Job(
+            title = title,
+            company = company,
+            location = location
+        )
+        
+        db.session.add(new_job)
+        db.session.commit()
+        return redirect(url_for('list_jobs'))
+        
+    return render_template('create_job.html', form = form)
+
 
 @app.route('/companies/list', methods=['GET'])
-def get_companies():
+def list_companies():
+    companies = Company.query.all()
     return render_template('companies_list.html', companies=companies)
 
-@app.route('/jobs/<int:job_id>', methods=['GET'])
-def get_job(job_id):
-    job = next((job for job in jobs if job['id'] == job_id), None)
-    if job:
-        return render_template('job_details.html', job=job)
-    return "Job not found", 404
 
-@app.route('/companies/<int:company_id>', methods=['GET'])
-def get_company(company_id):
-    company = next((company for company in companies if company['id'] == company_id), None)
-    if company:
-        return render_template('company_details.html', company=company)
-    return "Company not found", 404
+@app.route('/companies/<id>', methods=['GET'])
+def get_company(id):
+    company = Company.query.get(id)
+    return render_template('company_details.html', company=company)
+    
+
+@app.route('/companies/create', methods=['GET', 'POST'])
+def create_company():
+    form = CompanyCreationForm()
+    if form.validate_on_submit():
+        new_company = Company(
+            name=form.name.data,
+            location=form.location.data,
+            industry=form.industry.data,
+            employees_count=form.employees_count.data
+        )
+        
+        db.session.add(new_company)
+        db.session.commit()
+        return redirect(url_for('list_companies'))
+        
+    return render_template('create_company.html', form=form)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
-
